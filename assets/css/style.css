@@ -7887,6 +7887,18 @@ body.compensate-for-scrollbar {
   font-weight: 700;
   src: local("Merriweather Bold Italic"), local("Merriweather-BoldItalic"), url(../fonts/merriweather-bold-italic.ttf) format("truetype"); }
 
+@font-face {
+  font-family: 'NanumBarunpenR';
+  font-style: normal;
+  font-weight: 400;
+  src: local("NanumBarunpenR"), local("NanumBarunpenR"), url(../fonts/NanumBarunpenR.ttf) format("truetype"); }
+
+@font-face {
+  font-family: 'NanumBarunpenB';
+  font-style: normal;
+  font-weight: 700;
+  src: local("NanumBarunpenB"), local("NanumBarunpenB"), url(../fonts/NanumBarunpenB.ttf) format("truetype"); }
+
 html {
   font-family: "Open Sans", sans-serif;
   font-size: 10px;
@@ -9546,7 +9558,7 @@ figure.highlight,
     position: absolute;
     bottom: 0;
     width: calc(100% - (1.5em) * 2);
-    font-family: "Open Sans";
+    font-family: "Open Sans", "NanumSquareRound";
     font-style: italic;
     background: rgba(0, 0, 0, 0.75);
     font-size: 1.3rem;
@@ -9756,7 +9768,7 @@ a.fancybox {
       text-decoration: none; }
   .post .post-meta {
     line-height: 1.5em;
-    font-family: "Open Sans", sans-serif;
+    font-family: "NanumBarunpenB", sans-serif;
     font-size: 1.3rem;
     font-weight: 400;
     color: #9eabb3; }
@@ -9765,7 +9777,7 @@ a.fancybox {
   .post .post-content {
     text-rendering: optimizelegibility;
     letter-spacing: -0.3px;
-    font-family: "Merriweather", serif;
+    font-family: "NanumBarunpenB", sans-serif;
     color: #5d686f;
     margin-top: 20px;
     font-weight: 400;
@@ -9896,7 +9908,7 @@ a.fancybox {
         text-decoration: none; }
     .post-header-cover .post-header .post-meta {
       max-width: 750px;
-      font-family: "Open Sans", sans-serif;
+      font-family: "NanumBarunpenB", sans-serif;
       font-size: 1.6rem;
       color: white !important;
       font-weight: 400;
@@ -10051,7 +10063,7 @@ a.fancybox {
   .postShorten .postShorten-content {
     text-rendering: optimizelegibility;
     letter-spacing: -0.3px;
-    font-family: "Merriweather", serif;
+    font-family: "NanumBarunpenB", sans-serif;
     color: #5d686f;
     font-weight: 400;
     overflow: hidden;

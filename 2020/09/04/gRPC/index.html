@@ -1,0 +1,683 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Record Jiwoni&#39;s daily routine">
+    <title>gRPC - Record Jiwoni&#39;s daily routine</title>
+    <meta name="author" content="Comodoka">
+    
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Comodoka","sameAs":["https://github.com/","http://stackoverflow.com/users","https://twitter.com/","https://facebook.com/","https://plus.google.com/","https://www.linkedin.com/profile/","mailto"]},"articleBody":"0. GRPC\ngRPC 는 모든 환경에서 실행할 수 있는 고성능 RPC 프레임워크 오픈 소스이다.데이터 간의 교환을 플러그인 등을 제공하여 로드 밸런싱, 추적, 상태 체크, 권한 등을 효율적으로 연결된 서비스를 제공한다.표준 기반 HTTP/2를 전송용으로 사용하여 프록시와 방화벽을 쉽게 통과할 수 있다.프레임워크에 플러그 가능한 인증, 로드 분산 등이 있기 때문에 마이크로 서비스 상호 연결로 이상적이다.\n\nGo version 1.6 이상\ngRPC Install\nprotoc compiler Install (Protobuf v3)\n\n1234$ go versiongo version go1.13.5 darwin/amd64$ go get -u google.golang.org/grpc$ go get -u github.com/golang/protobuf/protoc-gen-go\n\n\n\n1. gRPC Project 생성한동안 열심히 봤던 Libra OpenSource 의 proto 파일을 옮겨본다.해당 proto 파일들을 별도 생성한 go Project 의 types 디렉토리에 옮긴다.\n1234567891011121314151617wonihome@woniHomeui-MacBook-Pro.local:/Users/wonihome/GoProject/libra_client/types $ ls -altotal 136drwxr-xr-x  15 wonihome  staff    480 Mar 11 22:38 .drwxr-xr-x   6 wonihome  staff    192 Mar 11 23:01 ..-rw-r--r--   1 wonihome  staff    183 Mar 11 22:38 access_path.proto-rw-r--r--   1 wonihome  staff    306 Mar 11 22:38 account_state_blob.proto-rw-r--r--   1 wonihome  staff    922 Mar 11 22:38 events.proto-rw-r--r--   1 wonihome  staff  14628 Mar 11 22:38 get_with_proof.proto-rw-r--r--   1 wonihome  staff    235 Mar 11 22:38 language_storage.proto-rw-r--r--   1 wonihome  staff   4217 Mar 11 22:38 ledger_info.proto-rw-r--r--   1 wonihome  staff   3594 Mar 11 22:38 proof.proto-rw-r--r--   1 wonihome  staff   3339 Mar 11 22:38 transaction.proto-rw-r--r--   1 wonihome  staff    886 Mar 11 22:38 transaction_info.proto-rw-r--r--   1 wonihome  staff    495 Mar 11 22:38 validator_change.proto-rw-r--r--   1 wonihome  staff    564 Mar 11 22:38 validator_public_keys.proto-rw-r--r--   1 wonihome  staff    298 Mar 11 22:38 validator_set.proto-rw-r--r--   1 wonihome  staff   1388 Mar 11 22:38 vm_errors.proto\n\n\n\n1-(1). ProtoBufProtoBuf 는 구글에서 개발하고 오픈소스로 공개한, 직렬화 데이타 구조이다. (Serialized Data Structure)특히 직렬화 속도가 빠르고 직렬화된 파일의 크기도 작다. XML 보다 파일 크기가 작다. 대게  통신 프로토콜, 데이터 저장소 등에 사용하는데 유용하다.\n데이터를 한번 구조화하는 방법을 정의하고 나면, 다양한 언어를 사용하여 쉽게 작성하고 읽을 수 있다.즉, 해당 proto 파일은 다양한 언어(C++,C#, Go, Java, Python, Object C, Javascript, Ruby)에서 컴파일해서 사용할 수 있다.\n- Example, ProtoBuf Compile1$ protoc -I=$SRC_DIR --go_out=$DST_DIR $SRC_DIR/addressbook.proto\n\n\n-I : proto_path 를 의미한다. \n\n–go_out : 최종 컴파일 후 생성되는 pb.go 파일의 위치\n\ngrpc 호환코드로 컴파일하고자 할때는 아래와 같이 plugins=grpc 명시한다.\n\n실제 proto-gen-go 사용해서 컴파일 명령어\n protoc -I types/ types/*.proto --go_out=plugins=grpc:types/.\n\n\n- ProtoBuf Compile12345678910111213141516171819202122232425262728293031323334353637$ protoc -I types/ types/*.proto --go_out=plugins=grpc:types/.events.proto:12:1: warning: Import access_path.proto but not used.vm_errors.proto:8:1: warning: Import language_storage.proto but not used.$ ls -altotal 472drwxr-xr-x  28 wonihome  staff    896 Mar 11 23:41 .drwxr-xr-x   6 wonihome  staff    192 Mar 11 23:37 ..-rw-r--r--   1 wonihome  staff   2869 Mar 11 23:41 access_path.pb.go-rw-r--r--   1 wonihome  staff    183 Mar 11 22:38 access_path.proto-rw-r--r--   1 wonihome  staff   5210 Mar 11 23:41 account_state_blob.pb.go-rw-r--r--   1 wonihome  staff    306 Mar 11 22:38 account_state_blob.proto-rw-r--r--   1 wonihome  staff   9552 Mar 11 23:41 events.pb.go-rw-r--r--   1 wonihome  staff    922 Mar 11 22:38 events.proto-rw-r--r--   1 wonihome  staff  42344 Mar 11 23:41 get_with_proof.pb.go-rw-r--r--   1 wonihome  staff  14628 Mar 11 22:38 get_with_proof.proto-rw-r--r--   1 wonihome  staff   2962 Mar 11 23:41 language_storage.pb.go-rw-r--r--   1 wonihome  staff    235 Mar 11 22:38 language_storage.proto-rw-r--r--   1 wonihome  staff  13131 Mar 11 23:41 ledger_info.pb.go-rw-r--r--   1 wonihome  staff   4217 Mar 11 22:38 ledger_info.proto-rw-r--r--   1 wonihome  staff  22159 Mar 11 23:41 proof.pb.go-rw-r--r--   1 wonihome  staff   3594 Mar 11 22:38 proof.proto-rw-r--r--   1 wonihome  staff  22272 Mar 11 23:41 transaction.pb.go-rw-r--r--   1 wonihome  staff   3339 Mar 11 22:38 transaction.proto-rw-r--r--   1 wonihome  staff   4884 Mar 11 23:41 transaction_info.pb.go-rw-r--r--   1 wonihome  staff    886 Mar 11 22:38 transaction_info.proto-rw-r--r--   1 wonihome  staff   3825 Mar 11 23:41 validator_change.pb.go-rw-r--r--   1 wonihome  staff    495 Mar 11 22:38 validator_change.proto-rw-r--r--   1 wonihome  staff   5109 Mar 11 23:41 validator_public_keys.pb.go-rw-r--r--   1 wonihome  staff    564 Mar 11 22:38 validator_public_keys.proto-rw-r--r--   1 wonihome  staff   3051 Mar 11 23:41 validator_set.pb.go-rw-r--r--   1 wonihome  staff    298 Mar 11 22:38 validator_set.proto-rw-r--r--   1 wonihome  staff   5144 Mar 11 23:41 vm_errors.pb.go-rw-r--r--   1 wonihome  staff   1388 Mar 11 22:38 vm_errors.proto$ protoc -I types/ types/mempool_status.proto --go_out=plugins=grpc:types/.$ protoc -I types/ types/admission_control.proto --go_out=plugins=grpc:types/.\n\n","dateCreated":"2020-09-04T23:01:32+09:00","dateModified":"2020-09-04T23:02:06+09:00","datePublished":"2020-09-04T23:01:32+09:00","description":"","headline":"gRPC","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://comodoka.github.io/2020/09/04/gRPC/"},"publisher":{"@type":"Organization","name":"Comodoka","sameAs":["https://github.com/","http://stackoverflow.com/users","https://twitter.com/","https://facebook.com/","https://plus.google.com/","https://www.linkedin.com/profile/","mailto"]},"url":"https://comodoka.github.io/2020/09/04/gRPC/"}</script>
+    <meta name="description" content="0. GRPC gRPC 는 모든 환경에서 실행할 수 있는 고성능 RPC 프레임워크 오픈 소스이다.데이터 간의 교환을 플러그인 등을 제공하여 로드 밸런싱, 추적, 상태 체크, 권한 등을 효율적으로 연결된 서비스를 제공한다.표준 기반 HTTP&#x2F;2를 전송용으로 사용하여 프록시와 방화벽을 쉽게 통과할 수 있다.프레임워크에 플러그 가능한 인증, 로드 분산 등이 있기">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="gRPC">
+<meta property="og:url" content="https://comodoka.github.io/2020/09/04/gRPC/index.html">
+<meta property="og:site_name" content="Record Jiwoni&#39;s daily routine">
+<meta property="og:description" content="0. GRPC gRPC 는 모든 환경에서 실행할 수 있는 고성능 RPC 프레임워크 오픈 소스이다.데이터 간의 교환을 플러그인 등을 제공하여 로드 밸런싱, 추적, 상태 체크, 권한 등을 효율적으로 연결된 서비스를 제공한다.표준 기반 HTTP&#x2F;2를 전송용으로 사용하여 프록시와 방화벽을 쉽게 통과할 수 있다.프레임워크에 플러그 가능한 인증, 로드 분산 등이 있기">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://www.grpc.io/img/landing-2.svg">
+<meta property="article:published_time" content="2020-09-04T14:01:32.000Z">
+<meta property="article:modified_time" content="2020-09-04T14:02:06.824Z">
+<meta property="article:author" content="Comodoka">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.grpc.io/img/landing-2.svg">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/assets/css/style-exgwylyh99ddhyzim3wve1l8byacpdbeqcf1o4kzfgkjsevtdosibxbzttdn.min.css">
+
+    <!--STYLES END-->
+    
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/%20"
+            aria-label=""
+        >
+            Record Jiwoni&#39;s daily routine
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="Open the link: /#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/all-archives"
+                            
+                            rel="noopener"
+                            title="Archives"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archives</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link open-algolia-search"
+                            href="#search"
+                            
+                            rel="noopener"
+                            title="Search"
+                        >
+                        <i class="sidebar-button-icon fa fa-search" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Search</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="http://stackoverflow.com/users"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="Stack Overflow"
+                        >
+                        <i class="sidebar-button-icon fab fa-stack-overflow" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Stack Overflow</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://twitter.com/"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="Twitter"
+                        >
+                        <i class="sidebar-button-icon fab fa-twitter" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Twitter</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://facebook.com/"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="Facebook"
+                        >
+                        <i class="sidebar-button-icon fab fa-facebook" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Facebook</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://plus.google.com/"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="Google +"
+                        >
+                        <i class="sidebar-button-icon fab fa-google-plus" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Google +</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://www.linkedin.com/profile/"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="LinkedIn"
+                        >
+                        <i class="sidebar-button-icon fab fa-linkedin" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">LinkedIn</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/mailto"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            gRPC
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2020-09-04T23:01:32+09:00">
+	
+		    Sep 04, 2020
+    	
+    </time>
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <h1 id="0-GRPC"><a href="#0-GRPC" class="headerlink" title="0. GRPC"></a>0. GRPC</h1><p><img src="https://www.grpc.io/img/landing-2.svg" alt="gRPC GUIDES"></p>
+<p>gRPC 는 모든 환경에서 실행할 수 있는 고성능 RPC 프레임워크 오픈 소스이다.<br>데이터 간의 교환을 플러그인 등을 제공하여 로드 밸런싱, 추적, 상태 체크, 권한 등을 효율적으로 연결된 서비스를 제공한다.<br>표준 기반 HTTP/2를 전송용으로 사용하여 프록시와 방화벽을 쉽게 통과할 수 있다.<br>프레임워크에 플러그 가능한 인증, 로드 분산 등이 있기 때문에 마이크로 서비스 상호 연결로 이상적이다.</p>
+<ul>
+<li>Go version 1.6 이상</li>
+<li>gRPC Install</li>
+<li>protoc compiler Install (Protobuf v3)</li>
+</ul>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ go version</span><br><span class="line">go version go1.<span class="number">13</span>.<span class="number">5</span> darwin/amd64</span><br><span class="line">$ go get -u google.golang.org/grpc</span><br><span class="line">$ go get -u github.com/golang/protobuf/protoc-gen-go</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="1-gRPC-Project-생성"><a href="#1-gRPC-Project-생성" class="headerlink" title="1. gRPC Project 생성"></a>1. gRPC Project 생성</h2><p>한동안 열심히 봤던 Libra OpenSource 의 proto 파일을 옮겨본다.<br>해당 proto 파일들을 별도 생성한 go Project 의 types 디렉토리에 옮긴다.</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">wonihome@woniHomeui-MacBook-Pro.local:/Users/wonihome/GoProject/libra_client/types $ ls -al</span><br><span class="line">total <span class="number">136</span></span><br><span class="line">drwxr-xr-x  <span class="number">15</span> wonihome  staff    <span class="number">480</span> Mar <span class="number">11</span> <span class="number">22</span>:<span class="number">38</span> .</span><br><span class="line">drwxr-xr-x   <span class="number">6</span> wonihome  staff    <span class="number">192</span> Mar <span class="number">11</span> <span class="number">23</span>:<span class="number">01</span> ..</span><br><span class="line">-rw-r--r--   <span class="number">1</span> wonihome  staff    <span class="number">183</span> Mar <span class="number">11</span> <span class="number">22</span>:<span class="number">38</span> access_path.proto</span><br><span class="line">-rw-r--r--   <span class="number">1</span> wonihome  staff    <span class="number">306</span> Mar <span class="number">11</span> <span class="number">22</span>:<span class="number">38</span> account_state_blob.proto</span><br><span class="line">-rw-r--r--   <span class="number">1</span> wonihome  staff    <span class="number">922</span> Mar <span class="number">11</span> <span class="number">22</span>:<span class="number">38</span> events.proto</span><br><span class="line">-rw-r--r--   <span class="number">1</span> wonihome  staff  <span class="number">14628</span> Mar <span class="number">11</span> <span class="number">22</span>:<span class="number">38</span> get_with_proof.proto</span><br><span class="line">-rw-r--r--   <span class="number">1</span> wonihome  staff    <span class="number">235</span> Mar <span class="number">11</span> <span class="number">22</span>:<span class="number">38</span> language_storage.proto</span><br><span class="line">-rw-r--r--   <span class="number">1</span> wonihome  staff   <span class="number">4217</span> Mar <span class="number">11</span> <span class="number">22</span>:<span class="number">38</span> ledger_info.proto</span><br><span class="line">-rw-r--r--   <span class="number">1</span> wonihome  staff   <span class="number">3594</span> Mar <span class="number">11</span> <span class="number">22</span>:<span class="number">38</span> proof.proto</span><br><span class="line">-rw-r--r--   <span class="number">1</span> wonihome  staff   <span class="number">3339</span> Mar <span class="number">11</span> <span class="number">22</span>:<span class="number">38</span> transaction.proto</span><br><span class="line">-rw-r--r--   <span class="number">1</span> wonihome  staff    <span class="number">886</span> Mar <span class="number">11</span> <span class="number">22</span>:<span class="number">38</span> transaction_info.proto</span><br><span class="line">-rw-r--r--   <span class="number">1</span> wonihome  staff    <span class="number">495</span> Mar <span class="number">11</span> <span class="number">22</span>:<span class="number">38</span> validator_change.proto</span><br><span class="line">-rw-r--r--   <span class="number">1</span> wonihome  staff    <span class="number">564</span> Mar <span class="number">11</span> <span class="number">22</span>:<span class="number">38</span> validator_public_keys.proto</span><br><span class="line">-rw-r--r--   <span class="number">1</span> wonihome  staff    <span class="number">298</span> Mar <span class="number">11</span> <span class="number">22</span>:<span class="number">38</span> validator_set.proto</span><br><span class="line">-rw-r--r--   <span class="number">1</span> wonihome  staff   <span class="number">1388</span> Mar <span class="number">11</span> <span class="number">22</span>:<span class="number">38</span> vm_errors.proto</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="1-1-ProtoBuf"><a href="#1-1-ProtoBuf" class="headerlink" title="1-(1). ProtoBuf"></a>1-(1). ProtoBuf</h2><p>ProtoBuf 는 구글에서 개발하고 오픈소스로 공개한, 직렬화 데이타 구조이다. (Serialized Data Structure)<br>특히 직렬화 속도가 빠르고 직렬화된 파일의 크기도 작다. XML 보다 파일 크기가 작다. 대게  통신 프로토콜, 데이터 저장소 등에 사용하는데 유용하다.</p>
+<p>데이터를 한번 구조화하는 방법을 정의하고 나면, 다양한 언어를 사용하여 쉽게 작성하고 읽을 수 있다.<br>즉, 해당 proto 파일은 다양한 언어(C++,C#, Go, Java, Python, Object C, Javascript, Ruby)에서 컴파일해서 사용할 수 있다.</p>
+<h3 id="Example-ProtoBuf-Compile"><a href="#Example-ProtoBuf-Compile" class="headerlink" title="- Example, ProtoBuf Compile"></a>- Example, ProtoBuf Compile</h3><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ protoc -I=$SRC_DIR --go_out=$DST_DIR $SRC_DIR/addressbook.proto</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>-I : proto_path 를 의미한다. </p>
+</li>
+<li><p>–go_out : 최종 컴파일 후 생성되는 pb.go 파일의 위치</p>
+</li>
+<li><p>grpc 호환코드로 컴파일하고자 할때는 아래와 같이 <strong>plugins=grpc</strong> 명시한다.</p>
+</li>
+<li><p>실제 proto-gen-go 사용해서 컴파일 명령어</p>
+<p><code> protoc -I types/ types/*.proto --go_out=plugins=grpc:types/.</code></p>
+</li>
+</ul>
+<h3 id="ProtoBuf-Compile"><a href="#ProtoBuf-Compile" class="headerlink" title="- ProtoBuf Compile"></a>- ProtoBuf Compile</h3><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">$ protoc -I types/ types/*.proto --go_out=plugins=grpc:types/.</span><br><span class="line"><span class="function">events.proto:12:1: <span class="title">warning</span>: <span class="title">Import</span> <span class="title">access_path.proto</span> <span class="title">but</span> <span class="title">not</span> <span class="title">used</span>.</span></span><br><span class="line"><span class="function"><span class="title">vm_errors.proto</span>:8:1: <span class="title">warning</span>: <span class="title">Import</span> <span class="title">language_storage.proto</span> <span class="title">but</span> <span class="title">not</span> <span class="title">used</span>.</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">$ <span class="title">ls</span> -<span class="title">al</span></span></span><br><span class="line"><span class="function"><span class="title">total</span> 472</span></span><br><span class="line"><span class="function"><span class="title">drwxr</span>-<span class="title">xr</span>-<span class="title">x</span>  28 <span class="title">wonihome</span>  <span class="title">staff</span>    896 <span class="title">Mar</span> 11 23:41 .</span></span><br><span class="line"><span class="function"><span class="title">drwxr</span>-<span class="title">xr</span>-<span class="title">x</span>   6 <span class="title">wonihome</span>  <span class="title">staff</span>    192 <span class="title">Mar</span> 11 23:37 ..</span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>   2869 <span class="title">Mar</span> 11 23:41 <span class="title">access_path.pb.go</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>    183 <span class="title">Mar</span> 11 22:38 <span class="title">access_path.proto</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>   5210 <span class="title">Mar</span> 11 23:41 <span class="title">account_state_blob.pb.go</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>    306 <span class="title">Mar</span> 11 22:38 <span class="title">account_state_blob.proto</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>   9552 <span class="title">Mar</span> 11 23:41 <span class="title">events.pb.go</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>    922 <span class="title">Mar</span> 11 22:38 <span class="title">events.proto</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>  42344 <span class="title">Mar</span> 11 23:41 <span class="title">get_with_proof.pb.go</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>  14628 <span class="title">Mar</span> 11 22:38 <span class="title">get_with_proof.proto</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>   2962 <span class="title">Mar</span> 11 23:41 <span class="title">language_storage.pb.go</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>    235 <span class="title">Mar</span> 11 22:38 <span class="title">language_storage.proto</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>  13131 <span class="title">Mar</span> 11 23:41 <span class="title">ledger_info.pb.go</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>   4217 <span class="title">Mar</span> 11 22:38 <span class="title">ledger_info.proto</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>  22159 <span class="title">Mar</span> 11 23:41 <span class="title">proof.pb.go</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>   3594 <span class="title">Mar</span> 11 22:38 <span class="title">proof.proto</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>  22272 <span class="title">Mar</span> 11 23:41 <span class="title">transaction.pb.go</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>   3339 <span class="title">Mar</span> 11 22:38 <span class="title">transaction.proto</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>   4884 <span class="title">Mar</span> 11 23:41 <span class="title">transaction_info.pb.go</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>    886 <span class="title">Mar</span> 11 22:38 <span class="title">transaction_info.proto</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>   3825 <span class="title">Mar</span> 11 23:41 <span class="title">validator_change.pb.go</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>    495 <span class="title">Mar</span> 11 22:38 <span class="title">validator_change.proto</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>   5109 <span class="title">Mar</span> 11 23:41 <span class="title">validator_public_keys.pb.go</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>    564 <span class="title">Mar</span> 11 22:38 <span class="title">validator_public_keys.proto</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>   3051 <span class="title">Mar</span> 11 23:41 <span class="title">validator_set.pb.go</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>    298 <span class="title">Mar</span> 11 22:38 <span class="title">validator_set.proto</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>   5144 <span class="title">Mar</span> 11 23:41 <span class="title">vm_errors.pb.go</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>   1388 <span class="title">Mar</span> 11 22:38 <span class="title">vm_errors.proto</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">$ <span class="title">protoc</span> -<span class="title">I</span> <span class="title">types</span>/ <span class="title">types</span>/<span class="title">mempool_status.proto</span> --<span class="title">go_out</span>=<span class="title">plugins</span>=<span class="title">grpc:types</span>/.</span></span><br><span class="line"><span class="function">$ <span class="title">protoc</span> -<span class="title">I</span> <span class="title">types</span>/ <span class="title">types</span>/<span class="title">admission_control.proto</span> --<span class="title">go_out</span>=<span class="title">plugins</span>=<span class="title">grpc:types</span>/.</span></span><br></pre></td></tr></table></figure>
+
+
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2020/09/04/hello-world/"
+                    data-tooltip="Hello World"
+                    aria-label="NEXT: Hello World"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Share this post"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://comodoka.github.io/2020/09/04/gRPC/"
+                    title="Share on Facebook"
+                    aria-label="Share on Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://comodoka.github.io/2020/09/04/gRPC/"
+                    title="Share on Twitter"
+                    aria-label="Share on Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://comodoka.github.io/2020/09/04/gRPC/"
+                    title="Share on Google+"
+                    aria-label="Share on Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2020 Comodoka. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2020/09/04/hello-world/"
+                    data-tooltip="Hello World"
+                    aria-label="NEXT: Hello World"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Share this post"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://comodoka.github.io/2020/09/04/gRPC/"
+                    title="Share on Facebook"
+                    aria-label="Share on Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://comodoka.github.io/2020/09/04/gRPC/"
+                    title="Share on Twitter"
+                    aria-label="Share on Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://comodoka.github.io/2020/09/04/gRPC/"
+                    title="Share on Google+"
+                    aria-label="Share on Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://comodoka.github.io/2020/09/04/gRPC/"
+                        aria-label="Share on Facebook"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Share on Facebook</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://comodoka.github.io/2020/09/04/gRPC/"
+                        aria-label="Share on Twitter"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Share on Twitter</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://comodoka.github.io/2020/09/04/gRPC/"
+                        aria-label="Share on Google+"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Share on Google+</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">Comodoka</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/assets/images/cover.jpg');"></div>
+        <!--SCRIPTS-->
+
+<script src="/assets/js/script-lhrmpj5azdtauxwzgxzkcih4lpzpixrsztaxfnluwj6pxi1xcb81pbo6gvto.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>

@@ -14,7 +14,7 @@
     <script type="application/ld+json">{}</script>
     <meta property="og:type" content="blog">
 <meta property="og:title" content="Record Jiwoni&#39;s daily routine">
-<meta property="og:url" content="http://example.com/archives/index.html">
+<meta property="og:url" content="https://comodoka.github.io/archives/index.html">
 <meta property="og:site_name" content="Record Jiwoni&#39;s daily routine">
 <meta property="og:locale" content="en_US">
 <meta property="article:author" content="Comodoka">
@@ -29,7 +29,7 @@
     
     <!--STYLES-->
     
-<link rel="stylesheet" href="/assets/css/style-y5c8lxzqwjdiwfe4vuvutfy2octybtdhdowdcqtmwn5u1wgqf69w1b6l4i4m.min.css">
+<link rel="stylesheet" href="/assets/css/style-exgwylyh99ddhyzim3wve1l8byacpdbeqcf1o4kzfgkjsevtdosibxbzttdn.min.css">
 
     <!--STYLES END-->
     
@@ -317,6 +317,90 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2020/09/04/gRPC/"
+                            aria-label=": gRPC"
+                        >
+                            gRPC
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2020-09-04T23:01:32+09:00">
+	
+		    Sep 04, 2020
+    	
+    </time>
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="0-GRPC"><a href="#0-GRPC" class="headerlink" title="0. GRPC"></a>0. GRPC</h1><p><img src="https://www.grpc.io/img/landing-2.svg" alt="gRPC GUIDES"></p>
+<p>gRPC 는 모든 환경에서 실행할 수 있는 고성능 RPC 프레임워크 오픈 소스이다.<br>데이터 간의 교환을 플러그인 등을 제공하여 로드 밸런싱, 추적, 상태 체크, 권한 등을 효율적으로 연결된 서비스를 제공한다.<br>표준 기반 HTTP/2를 전송용으로 사용하여 프록시와 방화벽을 쉽게 통과할 수 있다.<br>프레임워크에 플러그 가능한 인증, 로드 분산 등이 있기 때문에 마이크로 서비스 상호 연결로 이상적이다.</p>
+<ul>
+<li>Go version 1.6 이상</li>
+<li>gRPC Install</li>
+<li>protoc compiler Install (Protobuf v3)</li>
+</ul>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ go version</span><br><span class="line">go version go1.<span class="number">13</span>.<span class="number">5</span> darwin/amd64</span><br><span class="line">$ go get -u google.golang.org/grpc</span><br><span class="line">$ go get -u github.com/golang/protobuf/protoc-gen-go</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="1-gRPC-Project-생성"><a href="#1-gRPC-Project-생성" class="headerlink" title="1. gRPC Project 생성"></a>1. gRPC Project 생성</h2><p>한동안 열심히 봤던 Libra OpenSource 의 proto 파일을 옮겨본다.<br>해당 proto 파일들을 별도 생성한 go Project 의 types 디렉토리에 옮긴다.</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">wonihome@woniHomeui-MacBook-Pro.local:/Users/wonihome/GoProject/libra_client/types $ ls -al</span><br><span class="line">total <span class="number">136</span></span><br><span class="line">drwxr-xr-x  <span class="number">15</span> wonihome  staff    <span class="number">480</span> Mar <span class="number">11</span> <span class="number">22</span>:<span class="number">38</span> .</span><br><span class="line">drwxr-xr-x   <span class="number">6</span> wonihome  staff    <span class="number">192</span> Mar <span class="number">11</span> <span class="number">23</span>:<span class="number">01</span> ..</span><br><span class="line">-rw-r--r--   <span class="number">1</span> wonihome  staff    <span class="number">183</span> Mar <span class="number">11</span> <span class="number">22</span>:<span class="number">38</span> access_path.proto</span><br><span class="line">-rw-r--r--   <span class="number">1</span> wonihome  staff    <span class="number">306</span> Mar <span class="number">11</span> <span class="number">22</span>:<span class="number">38</span> account_state_blob.proto</span><br><span class="line">-rw-r--r--   <span class="number">1</span> wonihome  staff    <span class="number">922</span> Mar <span class="number">11</span> <span class="number">22</span>:<span class="number">38</span> events.proto</span><br><span class="line">-rw-r--r--   <span class="number">1</span> wonihome  staff  <span class="number">14628</span> Mar <span class="number">11</span> <span class="number">22</span>:<span class="number">38</span> get_with_proof.proto</span><br><span class="line">-rw-r--r--   <span class="number">1</span> wonihome  staff    <span class="number">235</span> Mar <span class="number">11</span> <span class="number">22</span>:<span class="number">38</span> language_storage.proto</span><br><span class="line">-rw-r--r--   <span class="number">1</span> wonihome  staff   <span class="number">4217</span> Mar <span class="number">11</span> <span class="number">22</span>:<span class="number">38</span> ledger_info.proto</span><br><span class="line">-rw-r--r--   <span class="number">1</span> wonihome  staff   <span class="number">3594</span> Mar <span class="number">11</span> <span class="number">22</span>:<span class="number">38</span> proof.proto</span><br><span class="line">-rw-r--r--   <span class="number">1</span> wonihome  staff   <span class="number">3339</span> Mar <span class="number">11</span> <span class="number">22</span>:<span class="number">38</span> transaction.proto</span><br><span class="line">-rw-r--r--   <span class="number">1</span> wonihome  staff    <span class="number">886</span> Mar <span class="number">11</span> <span class="number">22</span>:<span class="number">38</span> transaction_info.proto</span><br><span class="line">-rw-r--r--   <span class="number">1</span> wonihome  staff    <span class="number">495</span> Mar <span class="number">11</span> <span class="number">22</span>:<span class="number">38</span> validator_change.proto</span><br><span class="line">-rw-r--r--   <span class="number">1</span> wonihome  staff    <span class="number">564</span> Mar <span class="number">11</span> <span class="number">22</span>:<span class="number">38</span> validator_public_keys.proto</span><br><span class="line">-rw-r--r--   <span class="number">1</span> wonihome  staff    <span class="number">298</span> Mar <span class="number">11</span> <span class="number">22</span>:<span class="number">38</span> validator_set.proto</span><br><span class="line">-rw-r--r--   <span class="number">1</span> wonihome  staff   <span class="number">1388</span> Mar <span class="number">11</span> <span class="number">22</span>:<span class="number">38</span> vm_errors.proto</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="1-1-ProtoBuf"><a href="#1-1-ProtoBuf" class="headerlink" title="1-(1). ProtoBuf"></a>1-(1). ProtoBuf</h2><p>ProtoBuf 는 구글에서 개발하고 오픈소스로 공개한, 직렬화 데이타 구조이다. (Serialized Data Structure)<br>특히 직렬화 속도가 빠르고 직렬화된 파일의 크기도 작다. XML 보다 파일 크기가 작다. 대게  통신 프로토콜, 데이터 저장소 등에 사용하는데 유용하다.</p>
+<p>데이터를 한번 구조화하는 방법을 정의하고 나면, 다양한 언어를 사용하여 쉽게 작성하고 읽을 수 있다.<br>즉, 해당 proto 파일은 다양한 언어(C++,C#, Go, Java, Python, Object C, Javascript, Ruby)에서 컴파일해서 사용할 수 있다.</p>
+<h3 id="Example-ProtoBuf-Compile"><a href="#Example-ProtoBuf-Compile" class="headerlink" title="- Example, ProtoBuf Compile"></a>- Example, ProtoBuf Compile</h3><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ protoc -I=$SRC_DIR --go_out=$DST_DIR $SRC_DIR/addressbook.proto</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>-I : proto_path 를 의미한다. </p>
+</li>
+<li><p>–go_out : 최종 컴파일 후 생성되는 pb.go 파일의 위치</p>
+</li>
+<li><p>grpc 호환코드로 컴파일하고자 할때는 아래와 같이 <strong>plugins=grpc</strong> 명시한다.</p>
+</li>
+<li><p>실제 proto-gen-go 사용해서 컴파일 명령어</p>
+<p><code> protoc -I types/ types/*.proto --go_out=plugins=grpc:types/.</code></p>
+</li>
+</ul>
+<h3 id="ProtoBuf-Compile"><a href="#ProtoBuf-Compile" class="headerlink" title="- ProtoBuf Compile"></a>- ProtoBuf Compile</h3><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">$ protoc -I types/ types/*.proto --go_out=plugins=grpc:types/.</span><br><span class="line"><span class="function">events.proto:12:1: <span class="title">warning</span>: <span class="title">Import</span> <span class="title">access_path.proto</span> <span class="title">but</span> <span class="title">not</span> <span class="title">used</span>.</span></span><br><span class="line"><span class="function"><span class="title">vm_errors.proto</span>:8:1: <span class="title">warning</span>: <span class="title">Import</span> <span class="title">language_storage.proto</span> <span class="title">but</span> <span class="title">not</span> <span class="title">used</span>.</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">$ <span class="title">ls</span> -<span class="title">al</span></span></span><br><span class="line"><span class="function"><span class="title">total</span> 472</span></span><br><span class="line"><span class="function"><span class="title">drwxr</span>-<span class="title">xr</span>-<span class="title">x</span>  28 <span class="title">wonihome</span>  <span class="title">staff</span>    896 <span class="title">Mar</span> 11 23:41 .</span></span><br><span class="line"><span class="function"><span class="title">drwxr</span>-<span class="title">xr</span>-<span class="title">x</span>   6 <span class="title">wonihome</span>  <span class="title">staff</span>    192 <span class="title">Mar</span> 11 23:37 ..</span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>   2869 <span class="title">Mar</span> 11 23:41 <span class="title">access_path.pb.go</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>    183 <span class="title">Mar</span> 11 22:38 <span class="title">access_path.proto</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>   5210 <span class="title">Mar</span> 11 23:41 <span class="title">account_state_blob.pb.go</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>    306 <span class="title">Mar</span> 11 22:38 <span class="title">account_state_blob.proto</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>   9552 <span class="title">Mar</span> 11 23:41 <span class="title">events.pb.go</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>    922 <span class="title">Mar</span> 11 22:38 <span class="title">events.proto</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>  42344 <span class="title">Mar</span> 11 23:41 <span class="title">get_with_proof.pb.go</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>  14628 <span class="title">Mar</span> 11 22:38 <span class="title">get_with_proof.proto</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>   2962 <span class="title">Mar</span> 11 23:41 <span class="title">language_storage.pb.go</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>    235 <span class="title">Mar</span> 11 22:38 <span class="title">language_storage.proto</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>  13131 <span class="title">Mar</span> 11 23:41 <span class="title">ledger_info.pb.go</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>   4217 <span class="title">Mar</span> 11 22:38 <span class="title">ledger_info.proto</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>  22159 <span class="title">Mar</span> 11 23:41 <span class="title">proof.pb.go</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>   3594 <span class="title">Mar</span> 11 22:38 <span class="title">proof.proto</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>  22272 <span class="title">Mar</span> 11 23:41 <span class="title">transaction.pb.go</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>   3339 <span class="title">Mar</span> 11 22:38 <span class="title">transaction.proto</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>   4884 <span class="title">Mar</span> 11 23:41 <span class="title">transaction_info.pb.go</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>    886 <span class="title">Mar</span> 11 22:38 <span class="title">transaction_info.proto</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>   3825 <span class="title">Mar</span> 11 23:41 <span class="title">validator_change.pb.go</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>    495 <span class="title">Mar</span> 11 22:38 <span class="title">validator_change.proto</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>   5109 <span class="title">Mar</span> 11 23:41 <span class="title">validator_public_keys.pb.go</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>    564 <span class="title">Mar</span> 11 22:38 <span class="title">validator_public_keys.proto</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>   3051 <span class="title">Mar</span> 11 23:41 <span class="title">validator_set.pb.go</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>    298 <span class="title">Mar</span> 11 22:38 <span class="title">validator_set.proto</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>   5144 <span class="title">Mar</span> 11 23:41 <span class="title">vm_errors.pb.go</span></span></span><br><span class="line"><span class="function">-<span class="title">rw</span>-<span class="title">r</span>--<span class="title">r</span>--   1 <span class="title">wonihome</span>  <span class="title">staff</span>   1388 <span class="title">Mar</span> 11 22:38 <span class="title">vm_errors.proto</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">$ <span class="title">protoc</span> -<span class="title">I</span> <span class="title">types</span>/ <span class="title">types</span>/<span class="title">mempool_status.proto</span> --<span class="title">go_out</span>=<span class="title">plugins</span>=<span class="title">grpc:types</span>/.</span></span><br><span class="line"><span class="function">$ <span class="title">protoc</span> -<span class="title">I</span> <span class="title">types</span>/ <span class="title">types</span>/<span class="title">admission_control.proto</span> --<span class="title">go_out</span>=<span class="title">plugins</span>=<span class="title">grpc:types</span>/.</span></span><br></pre></td></tr></table></figure>
+
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2020/09/04/gRPC/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2020/09/04/hello-world/"
                             aria-label=": Hello World"
                         >
@@ -424,7 +508,7 @@
 <div id="cover" style="background-image:url('/assets/images/cover.jpg');"></div>
         <!--SCRIPTS-->
 
-<script src="/assets/js/script-uzybvopi6v0olwxrtqckxhjvbe0mceuhhuak3uquynt2j86z6gkercpgezoo.min.js"></script>
+<script src="/assets/js/script-lhrmpj5azdtauxwzgxzkcih4lpzpixrsztaxfnluwj6pxi1xcb81pbo6gvto.min.js"></script>
 
 <!--SCRIPTS END-->
 
